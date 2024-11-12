@@ -24,7 +24,7 @@
 
 # Here some stats:
 ![Anurag's GitHub stats](https://github-readme-stats.vercel.app/api?username=EmaAnd8&show_icons=true&theme=radical)
-[![Harlok's WakaTime stats](https://github-readme-stats.vercel.app/api/wakatime?username=EmaAnd8&show_icons=true&theme=radical)](https://github.com/anuraghazra/github-readme-stats)
+[![Harlok's WakaTime stats](https://github-readme-stats.vercel.app/api/wakatime?username=EmaAnd8&show_icons=true&theme=radical)]
   
 
 

@@ -19,8 +19,8 @@
 ### 💻 Tech Stack:
 
 ![Java](https://img.shields.io/badge/-Java-orange?logo=java&logoColor=white)
-![C](https://img.shields.io/badge/-Java-orange?logo=c&logoColor=white)
-![VHDL](https://img.shields.io/badge/-Java-orange?logo=vhdk&logoColor=white)
+![C](https://img.shields.io/badge/-C-orange?logo=c&logoColor=white)
+![VHDL](https://img.shields.io/badge/-Vhdl-orange?logo=vhdk&logoColor=white)
 ![LaTeX](https://img.shields.io/badge/-LaTeX-008080?logo=latex&logoColor=white)
 ![Markdown](https://img.shields.io/badge/-Markdown-000000?logo=markdown&logoColor=white)
 ![Python](https://img.shields.io/badge/-Python-3776AB?logo=python&logoColor=white)
@@ -31,7 +31,6 @@
 ![Bootstrap](https://img.shields.io/badge/-Bootstrap-7952B3?logo=bootstrap&logoColor=white)
 ![Expo](https://img.shields.io/badge/-Expo-000000?logo=expo&logoColor=white)
 ![Flask](https://img.shields.io/badge/-Flask-000000?logo=flask&logoColor=white)
-![Insomnia](https://img.shields.io/badge/-Insomnia-5849BE?logo=insomnia&logoColor=white)
 ![React Native](https://img.shields.io/badge/-React_Native-61DAFB?logo=react&logoColor=black)
 ![Amazon DynamoDB](https://img.shields.io/badge/-DynamoDB-4053D6?logo=amazondynamodb&logoColor=white)
 ![Neo4j](https://img.shields.io/badge/-Neo4j-008CC1?logo=neo4j&logoColor=white)

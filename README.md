@@ -5,8 +5,8 @@
 ## :boy: About me
 
 
-  * 💻 MS.c Computer Science And Egineering at Politecnico di Milano
-  * 💻 BC.s Computer Engineering at Università di Catania
+  * 💻 Msc Computer Science And Egineering at Politecnico di Milano
+  * 💻 BsC Computer Engineering at Università di Catania
 
 
 ## ⚙️ I am currently interested in

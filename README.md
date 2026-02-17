@@ -61,17 +61,6 @@
 <img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white"  />
 </a>
 
-# Here some stats:
-<!-- ✅ Quick drop-in fix (uses a stable mirror endpoint) -->
-<p align="center">
-  <img src="https://raw.githubusercontent.com/EmaAnd8/EmaAnd8/main/profile/stats.svg?v=1"
-       height="165"
-       alt="EmaAnd8 GitHub stats" />
-  <img src="https://raw.githubusercontent.com/EmaAnd8/EmaAnd8/main/profile/top-langs.svg?v=1"
-       height="165"
-       alt="EmaAnd8 Top Languages" />
-</p>
-
 
 
 ![GitHub Streak](https://streak-stats.demolab.com?user=EmaAnd8&theme=radical&hide_border=true)

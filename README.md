@@ -62,8 +62,12 @@
 </a>
 
 # Here some stats:
-![Anurag's GitHub stats](https://github-readme-stats.vercel.app/api?username=EmaAnd8&show_icons=true&theme=radical)  
-![Top Langs](https://github-readme-stats.vercel.app/api/top-langs/?username=EmaAnd8&hide_progress=false&theme=radical)
+![EmaAnd8 GitHub stats](https://github-readme-stats.vercel.app/api?username=EmaAnd8&show_icons=true&theme=radical&hide_border=true&rank_icon=github&include_all_commits=true&count_private=true)
+
+![EmaAnd8 Top Languages](https://github-readme-stats.vercel.app/api/top-langs/?username=EmaAnd8&layout=compact&theme=radical&hide_border=true&langs_count=10)
+
+![GitHub Streak](https://streak-stats.demolab.com?user=EmaAnd8&theme=radical&hide_border=true)
+
 
 
 

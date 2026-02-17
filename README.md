@@ -63,9 +63,15 @@
 
 # Here some stats:
 <!-- ✅ Quick drop-in fix (uses a stable mirror endpoint) -->
-![EmaAnd8 GitHub stats](https://github-readme-stats-git-masterrstaa-rickstaa.vercel.app/api?username=EmaAnd8&show_icons=true&theme=radical&hide_border=true&rank_icon=github&include_all_commits=true)
+<p align="center">
+  <img src="https://raw.githubusercontent.com/EmaAnd8/EmaAnd8/main/profile/stats.svg?v=1"
+       height="165"
+       alt="EmaAnd8 GitHub stats" />
+  <img src="https://raw.githubusercontent.com/EmaAnd8/EmaAnd8/main/profile/top-langs.svg?v=1"
+       height="165"
+       alt="EmaAnd8 Top Languages" />
+</p>
 
-![EmaAnd8 Top Languages](https://github-readme-stats-git-masterrstaa-rickstaa.vercel.app/api/top-langs/?username=EmaAnd8&layout=compact&theme=radical&hide_border=true&langs_count=10)
 
 
 ![GitHub Streak](https://streak-stats.demolab.com?user=EmaAnd8&theme=radical&hide_border=true)

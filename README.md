@@ -63,7 +63,7 @@
 
 
 
-![GitHub Streak](https://streak-stats.demolab.com?user=EmaAnd8&theme=radical&hide_border=true)
+![GitHub Streak](https://github-readme-streak-stats-eight.vercel.app?user=EmaAnd8&theme=radical&hide_border=true)
 
 
 

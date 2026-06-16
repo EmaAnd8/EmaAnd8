@@ -55,13 +55,13 @@
 ![Raspberry Pi](https://img.shields.io/badge/-Raspberry_Pi-C51A4A?logo=raspberrypi&logoColor=white)
 
 
-# :bell: You can contact me here:
+### :bell: You can contact me here:
 
 <a href="https://linkedin.com/in/emanuele-andaloro/">
 <img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white"  />
 </a>
 
-# 📊 Some statistics:
+### 📊 Some statistics:
 
 <p align="left">
   <img src="https://github-readme-stats.vercel.app/api?username=EmaAnd8&show_icons=true&rank_icon=percentile&theme=tokyonight" alt="Emanuele's GitHub stats" />

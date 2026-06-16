@@ -61,6 +61,8 @@
 <img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white"  />
 </a>
 
+# 📊 Some statistics:
+
 <p align="left">
   <img src="https://github-readme-stats.vercel.app/api?username=EmaAnd8&show_icons=true&rank_icon=percentile&theme=tokyonight" alt="Emanuele's GitHub stats" />
   <img src="https://streak-stats.demolab.com/?user=EmaAnd8&theme=tokyonight" alt="GitHub Streak" />

@@ -1,0 +1,56 @@
+<svg width="1280" height="220" viewBox="0 0 1280 220" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Emanuele Andaloro — MSc Computer Science and Engineering at Politecnico di Milano">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1280" y2="220" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0d1117"/>
+      <stop offset="1" stop-color="#161b2e"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1280" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#58a6ff"/>
+      <stop offset="0.5" stop-color="#bc8cff"/>
+      <stop offset="1" stop-color="#58a6ff"/>
+    </linearGradient>
+    <clipPath id="round">
+      <rect width="1280" height="220" rx="16"/>
+    </clipPath>
+  </defs>
+
+  <g clip-path="url(#round)">
+    <rect width="1280" height="220" fill="url(#bg)"/>
+
+    <!-- faint circuit grid -->
+    <path d="M110 0V220 M270 0V220 M430 0V220 M850 0V220 M1010 0V220 M1170 0V220 M0 58H1280 M0 168H1280" stroke="#58a6ff" stroke-opacity="0.05" stroke-width="1"/>
+
+    <!-- pulsing nodes -->
+    <circle class="node" cx="110" cy="58" r="3.5" fill="#58a6ff"/>
+    <circle class="node" cx="270" cy="168" r="3" fill="#bc8cff" style="animation-delay:0.6s"/>
+    <circle class="node" cx="430" cy="58" r="2.5" fill="#58a6ff" style="animation-delay:1.2s"/>
+    <circle class="node" cx="850" cy="168" r="3" fill="#58a6ff" style="animation-delay:0.3s"/>
+    <circle class="node" cx="1010" cy="58" r="3.5" fill="#bc8cff" style="animation-delay:1.6s"/>
+    <circle class="node" cx="1170" cy="168" r="2.5" fill="#58a6ff" style="animation-delay:0.9s"/>
+
+    <!-- text -->
+    <text class="name" x="640" y="104" text-anchor="middle">Emanuele Andaloro</text>
+    <text class="sub" x="640" y="140" text-anchor="middle">MSc Computer Science &amp; Engineering @ Politecnico di Milano</text>
+    <text class="tag" x="640" y="178" text-anchor="middle">&gt; machine learning · embedded AI · cybersecurity_</text>
+
+    <!-- animated accent bar -->
+    <rect y="212" width="1280" height="8" fill="url(#accent)"/>
+    <rect class="streak" y="212" width="260" height="8" fill="#ffffff" opacity="0.35"/>
+  </g>
+
+  <style>
+    .name { font: 700 54px 'Segoe UI', Ubuntu, 'Helvetica Neue', Arial, sans-serif; fill: #e6edf3; letter-spacing: 0.5px; }
+    .sub  { font: 400 21px 'Segoe UI', Ubuntu, 'Helvetica Neue', Arial, sans-serif; fill: #9baac0; }
+    .tag  { font: 600 16px Consolas, 'Courier New', monospace; fill: #58a6ff; }
+    .streak { animation: sweep 5s linear infinite; }
+    @keyframes sweep {
+      from { transform: translateX(-260px); }
+      to   { transform: translateX(1280px); }
+    }
+    .node { animation: pulse 2.6s ease-in-out infinite; }
+    @keyframes pulse {
+      0%, 100% { opacity: 0.15; }
+      50%      { opacity: 0.9; }
+    }
+  </style>
+</svg>

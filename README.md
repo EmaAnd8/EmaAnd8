@@ -58,8 +58,7 @@ I like machine learning that has to survive contact with the real world — mess
 |  | Work | Status |
 |---|---|---|
 | 🎓 | **MSc Thesis** — Unsupervised ML pipeline for fraud detection on public-transport ticketing data (Isolation Forest, LOF, One-Class SVM), built on real operator data | In progress |
-| 📄 | **Peer-reviewed paper** — Springer, **SCCS 2026** <!-- TODO: add title + DOI/link once published --> | ✅ Accepted |
-| 📝 | **Wearable AI system for clinical documentation** — edge device + cloud ASR/LLM pipeline <!-- TODO: update venue + link --> | Under review |
+
 | ⚙️ | **Embedded gesture recognition** — quantized GRU models deployed on-device via ONNX | Ongoing |
 
 <br/>

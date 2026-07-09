@@ -1,4 +1,3 @@
-
 <div align="center">
 
 <!-- ════════════════════════════ HEADER ════════════════════════════ -->
@@ -140,10 +139,15 @@ I like machine learning that has to survive contact with the real world — mess
 
 ## 📊 GitHub Analytics
 
+<!-- The two stats cards use the FREE PUBLIC github-readme-stats instance, which is often overloaded (→ broken images).
+     Permanent fix (~10 min): deploy your own free instance from github.com/anuraghazra/github-readme-stats
+     ("Deploy to Vercel" button), add a GitHub PAT as env var PAT_1, then replace
+     "github-readme-stats.vercel.app" with "YOUR-PROJECT-NAME.vercel.app" in the two <img> URLs below. -->
+
 <div align="center">
 
-<img height="170" src="https://github-readme-stats.vercel.app/api?username=EmaAnd8&show_icons=true&theme=tokyonight&hide_border=true&include_all_commits=true" alt="GitHub stats"/>
-<img height="170" src="https://github-readme-stats.vercel.app/api/top-langs/?username=EmaAnd8&layout=compact&theme=tokyonight&hide_border=true&langs_count=8" alt="Top languages"/>
+<img height="170" src="https://github-readme-stats.vercel.app/api?username=EmaAnd8&show_icons=true&theme=tokyonight&hide_border=true&rank_icon=github" alt="GitHub stats"/>
+<img height="170" src="https://github-readme-stats.vercel.app/api/top-langs/?username=EmaAnd8&layout=compact&theme=tokyonight&hide_border=true&langs_count=8&card_width=320" alt="Top languages"/>
 
 <br/><br/>
 

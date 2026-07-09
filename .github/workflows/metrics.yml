@@ -1,0 +1,43 @@
+# Place this file at: .github/workflows/metrics.yml in your EmaAnd8/EmaAnd8 repo
+#
+# One-time setup:
+#   1. Create a classic PAT at github.com/settings/tokens → "Generate new token (classic)"
+#      → tick NO scopes (public data only) → no expiration → copy it
+#   2. In the EmaAnd8/EmaAnd8 repo: Settings → Secrets and variables → Actions
+#      → New repository secret → Name: METRICS_TOKEN → paste the token
+#   3. Commit this file, then Actions tab → "Generate metrics" → Run workflow
+#
+# It commits github-metrics.svg to the repo root — the README references it directly,
+# so it renders 100% of the time with no external service involved.
+
+name: Generate metrics
+
+on:
+  schedule:
+    - cron: "0 3 * * *" # daily at 03:00 UTC (midnight crons get delayed on GitHub)
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - master
+
+permissions:
+  contents: write
+
+jobs:
+  metrics:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate stats image
+        uses: lowlighter/metrics@latest
+        with:
+          token: ${{ secrets.METRICS_TOKEN }}
+          user: EmaAnd8
+          template: classic
+          base: header, activity, community, repositories, metadata
+          config_timezone: Europe/Rome
+          plugin_languages: yes
+          plugin_languages_limit: 8
+          plugin_languages_colors: github
+          plugin_isocalendar: yes
+          plugin_isocalendar_duration: half-year

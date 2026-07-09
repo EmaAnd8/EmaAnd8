@@ -46,7 +46,7 @@ class Emanuele:
 
 - 🔭 Currently working on my **MSc thesis**: unsupervised ML for **fraud detection** on real public-transport ticketing data
 - ⚡ Deploying neural networks where they *shouldn't* fit: **microcontrollers, wearables, edge devices**
-- 🌱 Aiming for a **PhD in embedded AI / on-device ML**
+- 🌱 Aiming for ...**
 - 💬 Ask me about anomaly detection, model quantization, or why LaTeX + TikZ is worth the pain
 
 <br/>
@@ -64,7 +64,7 @@ I like machine learning that has to survive contact with the real world — mess
 
 | Project | What it does | Built with |
 |---|---|---|
-| 🕵️ **VALIDATO** | Unsupervised fraud-detection pipeline for transit ticketing: feature engineering, synthetic fraud injection, threshold calibration, real-fraud evaluation — my MSc thesis work | Python · scikit-learn · Pandas |
+| 🕵️ **VALIDATO** | Unsupervised fraud-detection pipeline for transit ticketing
 | 📱 **Gesture Recognition App** | Real-time gesture recognition on mobile with a quantized GRU model running fully on-device | Flutter · ONNX Runtime |
 | 🔧 **Open Source — [RLC](https://github.com/rl-language/rlc)** | LSP and fuzzing contributions to the RLC language toolchain → [my fork](https://github.com/EmaAnd8/rlc) | C++ · MLIR · libFuzzer |
 
@@ -179,7 +179,7 @@ I like machine learning that has to survive contact with the real world — mess
   <img src="https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub"/>
 </a>
 <!-- Uncomment and add your real address when ready:
-<a href="mailto:YOUR_EMAIL_HERE">
+<a href="mailto:Yemanu24.anda@gmail.com">
   <img src="https://img.shields.io/badge/Email-EA4335?style=for-the-badge&logo=gmail&logoColor=white" alt="Email"/>
 </a>
 -->

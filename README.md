@@ -1,7 +1,7 @@
 <div align="center">
 
 <!-- ════════════════════════════ HEADER ════════════════════════════ -->
-<img src="https://capsule-render.vercel.app/api?type=waving&color=0:0d1117,45:58a6ff,100:0d1117&height=220&section=header&text=Emanuele%20Andaloro&fontSize=52&fontColor=ffffff&animation=fadeIn&fontAlignY=35&desc=MSc%20Computer%20Science%20%26%20Engineering%20%40%20Politecnico%20di%20Milano&descSize=17&descAlignY=55" width="100%" alt="header"/>
+<img src="assets/header.svg" width="100%" alt="header"/>
 
 <!-- Typing animation -->
 <a href="https://github.com/EmaAnd8">
@@ -139,27 +139,16 @@ I like machine learning that has to survive contact with the real world — mess
 
 ## 📊 GitHub Analytics
 
-<!-- The two stats cards use the FREE PUBLIC github-readme-stats instance, which is often overloaded (→ broken images).
-     Permanent fix (~10 min): deploy your own free instance from github.com/anuraghazra/github-readme-stats
-     ("Deploy to Vercel" button), add a GitHub PAT as env var PAT_1, then replace
-     "github-readme-stats.vercel.app" with "YOUR-PROJECT-NAME.vercel.app" in the two <img> URLs below. -->
+<!-- The metrics image below is generated INSIDE this repo by .github/workflows/metrics.yml — no external service can break it.
+     It appears after you add the METRICS_TOKEN secret and run the "Generate metrics" workflow once (see the comments in metrics.yml). -->
 
 <div align="center">
 
-<img height="170" src="https://github-readme-stats.vercel.app/api?username=EmaAnd8&show_icons=true&theme=tokyonight&hide_border=true&rank_icon=github" alt="GitHub stats"/>
-<img height="170" src="https://github-readme-stats.vercel.app/api/top-langs/?username=EmaAnd8&layout=compact&theme=tokyonight&hide_border=true&langs_count=8&card_width=320" alt="Top languages"/>
+<img src="github-metrics.svg" width="100%" alt="GitHub metrics"/>
 
 <br/><br/>
 
 <img src="https://streak-stats.demolab.com?user=EmaAnd8&theme=tokyonight&hide_border=true" alt="GitHub streak"/>
-
-<br/><br/>
-
-<img src="https://github-readme-activity-graph.vercel.app/graph?username=EmaAnd8&theme=tokyo-night&hide_border=true&area=true" alt="Contribution graph"/>
-
-<br/><br/>
-
-<img src="https://github-profile-trophy.vercel.app/?username=EmaAnd8&theme=tokyonight&no-frame=true&no-bg=true&row=1&column=7" alt="GitHub trophies"/>
 
 </div>
 
@@ -197,9 +186,7 @@ I like machine learning that has to survive contact with the real world — mess
 
 <br/><br/>
 
-<img src="https://quotes-github-readme.vercel.app/api?type=horizontal&theme=tokyonight" alt="Dev quote of the day"/>
-
 <!-- ════════════════════════════ FOOTER ════════════════════════════ -->
-<img src="https://capsule-render.vercel.app/api?type=waving&color=0:0d1117,45:58a6ff,100:0d1117&height=120&section=footer" width="100%" alt="footer"/>
+<img src="assets/footer.svg" width="100%" alt="footer"/>
 
 </div>

@@ -1,0 +1,35 @@
+<svg width="1280" height="96" viewBox="0 0 1280 96" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Footer">
+  <defs>
+    <linearGradient id="bgf" x1="0" y1="0" x2="1280" y2="96" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#161b2e"/>
+      <stop offset="1" stop-color="#0d1117"/>
+    </linearGradient>
+    <linearGradient id="accentf" x1="0" y1="0" x2="1280" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#58a6ff"/>
+      <stop offset="0.5" stop-color="#bc8cff"/>
+      <stop offset="1" stop-color="#58a6ff"/>
+    </linearGradient>
+    <clipPath id="roundf">
+      <rect width="1280" height="96" rx="16"/>
+    </clipPath>
+  </defs>
+
+  <g clip-path="url(#roundf)">
+    <rect width="1280" height="96" fill="url(#bgf)"/>
+
+    <!-- animated accent bar on top -->
+    <rect width="1280" height="6" fill="url(#accentf)"/>
+    <rect class="streak" width="260" height="6" fill="#ffffff" opacity="0.35"/>
+
+    <text class="mono" x="640" y="60" text-anchor="middle">// thanks for stopping by — let's build something</text>
+  </g>
+
+  <style>
+    .mono { font: 600 17px Consolas, 'Courier New', monospace; fill: #9baac0; }
+    .streak { animation: sweepf 5s linear infinite; }
+    @keyframes sweepf {
+      from { transform: translateX(-260px); }
+      to   { transform: translateX(1280px); }
+    }
+  </style>
+</svg>

@@ -139,11 +139,10 @@ I like machine learning that has to survive contact with the real world — mess
 
 ## 📊 Statistics
 
-<!-- ── Everything below except the streak, trophies and activity graph is generated INSIDE this repo
-        by GitHub Actions (summary-cards.yml + metrics.yml) → those cards always render.
-        NOTE: summary-cards does NOT run on push — trigger it once from the Actions tab (then daily cron takes over).
-     ── Trophies and the activity graph are free public instances with no repo-generated equivalent:
-        they can blink under heavy load and recover on their own. Delete those two lines if that bothers you. -->
+<!-- ── Everything below except the streak and the activity graph is generated INSIDE this repo by GitHub Actions
+        (summary-cards.yml + metrics.yml + trophy.yml) → those cards always render.
+        NOTE: summary-cards and trophy do NOT run on push — trigger them from the Actions tab (daily cron takes over after).
+     ── The activity graph is the last free public instance left: it can blink under heavy load and recovers on its own. -->
 
 <div align="center">
 
@@ -157,7 +156,7 @@ I like machine learning that has to survive contact with the real world — mess
 
 <br/><br/>
 
-<img src="https://github-profile-trophy.vercel.app/?username=EmaAnd8&theme=tokyonight&row=1&column=7&margin-w=8" alt="GitHub trophies"/>
+<img src="trophy.svg" alt="GitHub trophies"/>
 
 <br/><br/>
 

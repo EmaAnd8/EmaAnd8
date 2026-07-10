@@ -16,7 +16,7 @@
   <a href="#-research">Research</a> ·
   <a href="#-featured-projects">Projects</a> ·
   <a href="#-tech-stack">Tech Stack</a> ·
-  <a href="#-github-analytics">Stats</a> ·
+  <a href="#-statistics">Stats</a> ·
   <a href="#-lets-connect">Contact</a>
 </p>
 
@@ -137,18 +137,39 @@ I like machine learning that has to survive contact with the real world — mess
 
 <br/>
 
-## 📊 GitHub Analytics
+## 📊 Statistics
 
-<!-- The metrics image below is generated INSIDE this repo by .github/workflows/metrics.yml — no external service can break it.
-     It appears after you add the METRICS_TOKEN secret and run the "Generate metrics" workflow once (see the comments in metrics.yml). -->
+<!-- ── The profile-details, productive-time, language cards and the metrics image are generated INSIDE this repo
+        by GitHub Actions (summary-cards.yml + metrics.yml) → they always render.
+     ── The stats card, trophies and activity graph use free public instances: they can blink under heavy load.
+        If the github-readme-stats card ever breaks again, self-host it on Vercel and swap the domain. -->
 
 <div align="center">
 
-<img src="github-metrics.svg" width="100%" alt="GitHub metrics"/>
+<img height="180" src="https://github-readme-stats.vercel.app/api?username=EmaAnd8&show_icons=true&theme=tokyonight&hide_border=true" alt="GitHub stats"/>
+<img height="180" src="https://streak-stats.demolab.com?user=EmaAnd8&theme=tokyonight&hide_border=true" alt="GitHub streak"/>
 
 <br/><br/>
 
-<img src="https://streak-stats.demolab.com?user=EmaAnd8&theme=tokyonight&hide_border=true" alt="GitHub streak"/>
+<img width="49%" src="profile-summary-card-output/tokyonight/4-productive-time.svg" alt="Commits per day hour"/>
+<img width="49%" src="profile-summary-card-output/tokyonight/2-most-commit-language.svg" alt="Most used languages"/>
+
+<br/><br/>
+
+<img src="https://github-profile-trophy.vercel.app/?username=EmaAnd8&theme=tokyonight&row=1&column=7&margin-w=8" alt="GitHub trophies"/>
+
+<br/><br/>
+
+<img src="https://github-readme-activity-graph.vercel.app/graph?username=EmaAnd8&theme=tokyo-night&hide_border=true&area=true" alt="Contribution graph"/>
+
+<br/><br/>
+
+<img width="100%" src="profile-summary-card-output/tokyonight/0-profile-details.svg" alt="Profile details"/>
+
+<br/><br/>
+
+<!-- Deep-dive card — delete the line below if the section feels too long -->
+<img src="github-metrics.svg" width="100%" alt="Detailed GitHub metrics"/>
 
 </div>
 

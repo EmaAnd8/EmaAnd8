@@ -139,14 +139,15 @@ I like machine learning that has to survive contact with the real world — mess
 
 ## 📊 Statistics
 
-<!-- ── The profile-details, productive-time, language cards and the metrics image are generated INSIDE this repo
-        by GitHub Actions (summary-cards.yml + metrics.yml) → they always render.
-     ── The stats card, trophies and activity graph use free public instances: they can blink under heavy load.
-        If the github-readme-stats card ever breaks again, self-host it on Vercel and swap the domain. -->
+<!-- ── Everything below except the streak, trophies and activity graph is generated INSIDE this repo
+        by GitHub Actions (summary-cards.yml + metrics.yml) → those cards always render.
+        NOTE: summary-cards does NOT run on push — trigger it once from the Actions tab (then daily cron takes over).
+     ── Trophies and the activity graph are free public instances with no repo-generated equivalent:
+        they can blink under heavy load and recover on their own. Delete those two lines if that bothers you. -->
 
 <div align="center">
 
-<img height="180" src="https://github-readme-stats.vercel.app/api?username=EmaAnd8&show_icons=true&theme=tokyonight&hide_border=true" alt="GitHub stats"/>
+<img height="180" src="profile-summary-card-output/tokyonight/3-stats.svg" alt="GitHub stats"/>
 <img height="180" src="https://streak-stats.demolab.com?user=EmaAnd8&theme=tokyonight&hide_border=true" alt="GitHub streak"/>
 
 <br/><br/>

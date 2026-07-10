@@ -1,0 +1,31 @@
+# Place this file at: .github/workflows/summary-cards.yml in your EmaAnd8/EmaAnd8 repo
+#
+# No new setup needed — it reuses your existing METRICS_TOKEN secret.
+# After committing: Actions tab → "Generate profile summary cards" → Run workflow.
+# The cards are committed to profile-summary-card-output/tokyonight/ in this repo,
+# so they always render — no external service involved at display time.
+
+name: Generate profile summary cards
+
+on:
+  schedule:
+    - cron: "30 3 * * *" # daily at 03:30 UTC
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: generate-github-profile-summary-cards
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: vn7n24fzkq/github-profile-summary-cards@release
+        env:
+          GITHUB_TOKEN: ${{ secrets.METRICS_TOKEN }}
+        with:
+          USERNAME: ${{ github.repository_owner }}
+          BRANCH_NAME: "main"
+          UTC_OFFSET: 2 # Italy (CEST) — switch to 1 in winter if you want the productive-time card exact
+          EXCLUDE: ""
+          AUTO_PUSH: true

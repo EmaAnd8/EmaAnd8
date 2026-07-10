@@ -1,44 +1,31 @@
-# Place this file at: .github/workflows/metrics.yml in your EmaAnd8/EmaAnd8 repo
+# Place this file at: .github/workflows/summary-cards.yml in your EmaAnd8/EmaAnd8 repo
 #
-# One-time setup:
-#   1. Create a classic PAT at github.com/settings/tokens → "Generate new token (classic)"
-#      → tick NO scopes (public data only) → no expiration → copy it
-#   2. In the EmaAnd8/EmaAnd8 repo: Settings → Secrets and variables → Actions
-#      → New repository secret → Name: METRICS_TOKEN → paste the token
-#   3. Commit this file, then Actions tab → "Generate metrics" → Run workflow
-#
-# It commits github-metrics.svg to the repo root — the README references it directly,
-# so it renders 100% of the time with no external service involved.
+# No new setup needed — it reuses your existing METRICS_TOKEN secret.
+# After committing: Actions tab → "Generate profile summary cards" → Run workflow.
+# The cards are committed to profile-summary-card-output/tokyonight/ in this repo,
+# so they always render — no external service involved at display time.
 
-name: Generate metrics
+name: Generate profile summary cards
 
 on:
   schedule:
-    - cron: "0 3 * * *" # daily at 03:00 UTC (midnight crons get delayed on GitHub)
+    - cron: "30 3 * * *" # daily at 03:30 UTC
   workflow_dispatch:
-  push:
-    branches:
-      - main
-      - master
-
-permissions:
-  contents: write
 
 jobs:
-  metrics:
+  build:
     runs-on: ubuntu-latest
+    name: generate-github-profile-summary-cards
+    permissions:
+      contents: write
     steps:
-      - name: Generate stats image
-        uses: lowlighter/metrics@latest
+      - uses: actions/checkout@v4
+      - uses: vn7n24fzkq/github-profile-summary-cards@release
+        env:
+          GITHUB_TOKEN: ${{ secrets.METRICS_TOKEN }}
         with:
-          token: ${{ secrets.METRICS_TOKEN }}
-          user: EmaAnd8
-          template: classic
-          base: header, activity, community, repositories, metadata
-          config_timezone: Europe/Rome
-          config_padding: 0, 24 + 6%
-          plugin_languages: yes
-          plugin_languages_limit: 8
-          plugin_languages_colors: github
-          plugin_isocalendar: yes
-          plugin_isocalendar_duration: half-year
+          USERNAME: ${{ github.repository_owner }}
+          BRANCH_NAME: "main"
+          UTC_OFFSET: 2 # Italy (CEST) — switch to 1 in winter if you want the productive-time card exact
+          EXCLUDE: ""
+          AUTO_PUSH: true

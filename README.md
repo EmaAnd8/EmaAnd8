@@ -64,7 +64,7 @@ I like machine learning that has to survive contact with the real world — mess
 
 | Project | What it does | Built with |
 |---|---|---|
-| 🕵️ **VALIDATO** | Unsupervised fraud-detection pipeline for transit ticketing
+| 🕵️ **MSc Thesis** | Unsupervised fraud-detection pipeline for transit ticketing
 | 📱 **Gesture Recognition App** | Real-time gesture recognition on mobile with a quantized GRU model running fully on-device | Flutter · ONNX Runtime |
 | 🔧 **Open Source — [RLC](https://github.com/rl-language/rlc)** | LSP and fuzzing contributions to the RLC language toolchain → [my fork](https://github.com/EmaAnd8/rlc) | C++ · MLIR · libFuzzer |
 

@@ -30,16 +30,12 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Generate trophy SVG
-        # = Erik-Donath/github-profile-trophy@feature/generate-svg, pinned
-        uses: Erik-Donath/github-profile-trophy@eb0893b31de06841663555d10aa43eb7cf27952f
+        uses: ryo-ma/github-profile-trophy@v2
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
           username: ${{ github.repository_owner }}
-          file: trophy.svg
           theme: tokyonight
-          max-rows: "1"
-          max-cols: "7"
-          margin-width: "8"
+          no-frame: false
+          margin-width: 8
 
       - name: Commit and push
         run: |

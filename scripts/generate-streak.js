@@ -1,12 +1,10 @@
 #!/usr/bin/env node
 /**
- * Generate streak.svg from GitHub contribution data.
- * Self-hosted replacement for external streak-stats service.
+ * Generate streak.svg from the GitHub contribution calendar (GraphQL).
  *
- * Fetches recent commits via GitHub API and calculates:
- * - Current streak (consecutive days with contributions)
- * - Longest streak (best streak in the past year)
- * - Total contributions
+ * Uses the same data source as streak-stats: contributionsCollection ->
+ * contributionCalendar. This counts ALL contributions (commits, PRs, issues,
+ * reviews), not just commits indexed by the REST search API.
  */
 
 const https = require("https");
@@ -15,261 +13,186 @@ const fs = require("fs");
 const TOKEN = process.env.GITHUB_TOKEN;
 const USERNAME = process.env.USERNAME;
 
-console.log(`📊 Generating streak stats for @${USERNAME}`);
+const QUERY = `
+query($login: String!, $from: DateTime!, $to: DateTime!) {
+  user(login: $login) {
+    contributionsCollection(from: $from, to: $to) {
+      contributionCalendar {
+        totalContributions
+        weeks {
+          contributionDays { date contributionCount }
+        }
+      }
+    }
+  }
+}`;
 
-if (!TOKEN || !USERNAME) {
-  console.error("❌ Missing GITHUB_TOKEN or USERNAME env vars");
-  console.error(`   GITHUB_TOKEN: ${TOKEN ? "set" : "MISSING"}`);
-  console.error(`   USERNAME: ${USERNAME ? "set" : "MISSING"}`);
-  process.exit(1);
-}
+function graphql(variables) {
+  const body = JSON.stringify({ query: QUERY, variables });
 
-/**
- * Make HTTPS request with error handling.
- */
-function httpsRequest(options, body = null) {
   return new Promise((resolve, reject) => {
-    const req = https.request(options, (res) => {
-      let data = "";
-      res.on("data", (chunk) => (data += chunk));
-      res.on("end", () => {
-        if (res.statusCode >= 400) {
-          console.error(`❌ HTTP ${res.statusCode}`);
-          console.error(`   Response: ${data.substring(0, 200)}`);
-          reject(
-            new Error(
-              `HTTP ${res.statusCode}: ${data.substring(0, 100)}`
-            )
-          );
-          return;
-        }
-        try {
-          resolve(JSON.parse(data));
-        } catch (e) {
-          console.error("❌ JSON parse error");
-          console.error(`   Response: ${data.substring(0, 200)}`);
-          reject(e);
-        }
-      });
-    });
-
-    req.on("error", (err) => {
-      console.error("❌ Network error:", err.message);
-      reject(err);
-    });
-
-    req.setTimeout(10000, () => {
+    const req = https.request(
+      {
+        hostname: "api.github.com",
+        path: "/graphql",
+        method: "POST",
+        headers: {
+          "User-Agent": "streak-generator",
+          Authorization: `bearer ${TOKEN}`,
+          "Content-Type": "application/json",
+          "Content-Length": Buffer.byteLength(body),
+        },
+      },
+      (res) => {
+        let data = "";
+        res.on("data", (c) => (data += c));
+        res.on("end", () => {
+          if (res.statusCode !== 200) {
+            return reject(
+              new Error(`HTTP ${res.statusCode}: ${data.slice(0, 300)}`)
+            );
+          }
+          let parsed;
+          try {
+            parsed = JSON.parse(data);
+          } catch (e) {
+            return reject(new Error(`Bad JSON: ${data.slice(0, 300)}`));
+          }
+          if (parsed.errors) {
+            return reject(
+              new Error(
+                `GraphQL: ${JSON.stringify(parsed.errors).slice(0, 300)}`
+              )
+            );
+          }
+          resolve(parsed.data);
+        });
+      }
+    );
+    req.on("error", reject);
+    req.setTimeout(15000, () => {
       req.destroy();
       reject(new Error("Request timeout"));
     });
-
-    if (body) req.write(body);
+    req.write(body);
     req.end();
   });
 }
 
 /**
- * Fetch user's commits from the past year via GitHub API.
+ * days: [{ date: "YYYY-MM-DD", contributionCount: n }] in ascending date order.
  */
-async function fetchCommits() {
-  const oneYearAgo = new Date();
-  oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
-  const since = oneYearAgo.toISOString();
+function calculateStreaks(days) {
+  const total = days.reduce((s, d) => s + d.contributionCount, 0);
 
-  const query = new URLSearchParams({
-    q: `author:${USERNAME} committer-date:>=${since}`,
-    sort: "committer-date",
-    order: "desc",
-    per_page: 100,
-  });
-
-  const options = {
-    hostname: "api.github.com",
-    path: `/search/commits?${query}`,
-    method: "GET",
-    headers: {
-      "User-Agent": "GitHub-Streak-Generator/1.0",
-      Authorization: `token ${TOKEN}`,
-      Accept: "application/vnd.github.v3+json",
-    },
-  };
-
-  console.log(`   Fetching commits since ${since}...`);
-  const data = await httpsRequest(options);
-  
-  if (data.items) {
-    console.log(`   ✅ Found ${data.items.length} commits`);
-    return data.items;
-  }
-  
-  console.warn(`   ⚠️  No items in response, using empty array`);
-  return [];
-}
-
-/**
- * Extract unique commit dates and calculate streaks.
- */
-function calculateStreaks(commits) {
-  // Get unique dates with commits (UTC midnight)
-  const datesWithCommits = new Set();
-  
-  commits.forEach((commit) => {
-    try {
-      if (commit.commit && commit.commit.committer && commit.commit.committer.date) {
-        const date = new Date(commit.commit.committer.date);
-        const dateStr = date.toISOString().split("T")[0];
-        datesWithCommits.add(dateStr);
-      }
-    } catch (e) {
-      console.warn(`   ⚠️  Skipped malformed commit`, e.message);
+  // Longest streak: forward scan.
+  let longest = 0;
+  let run = 0;
+  for (const d of days) {
+    if (d.contributionCount > 0) {
+      run += 1;
+      if (run > longest) longest = run;
+    } else {
+      run = 0;
     }
-  });
-
-  const sortedDates = Array.from(datesWithCommits)
-    .sort()
-    .reverse(); // Most recent first
-
-  if (sortedDates.length === 0) {
-    console.warn("   ⚠️  No commits found, using zeros");
-    return {
-      currentStreak: 0,
-      longestStreak: 0,
-      totalContributions: 0,
-      lastCommitDate: null,
-    };
   }
 
-  // Calculate current streak
-  let currentStreak = 0;
-  let today = new Date();
-  today.setUTCHours(0, 0, 0, 0);
-
-  for (let i = 0; i < sortedDates.length; i++) {
-    const date = new Date(sortedDates[i]);
-    const daysAgo = Math.floor((today - date) / (1000 * 60 * 60 * 24));
-
-    if (daysAgo === i) {
-      currentStreak++;
+  // Current streak: backward scan from the most recent day.
+  // A zero on TODAY does not break the streak (the day isn't over yet);
+  // a zero on any earlier day does.
+  let current = 0;
+  for (let i = days.length - 1; i >= 0; i--) {
+    if (days[i].contributionCount > 0) {
+      current += 1;
+    } else if (i === days.length - 1) {
+      continue; // today, still open
     } else {
       break;
     }
   }
 
-  // Calculate longest streak
-  let longestStreak = 1;
-  let currentRunStreak = 1;
-
-  for (let i = 1; i < sortedDates.length; i++) {
-    const prevDate = new Date(sortedDates[i - 1]);
-    const currDate = new Date(sortedDates[i]);
-    const diffDays = Math.floor((prevDate - currDate) / (1000 * 60 * 60 * 24));
-
-    if (diffDays === 1) {
-      currentRunStreak++;
-      longestStreak = Math.max(longestStreak, currentRunStreak);
-    } else {
-      currentRunStreak = 1;
-    }
-  }
-
-  console.log(
-    `   📈 Current: ${currentStreak} | Longest: ${longestStreak} | Total: ${sortedDates.length}`
-  );
-
-  return {
-    currentStreak,
-    longestStreak,
-    totalContributions: sortedDates.length,
-    lastCommitDate: sortedDates[0],
-  };
+  return { current, longest, total };
 }
 
-/**
- * Generate SVG with Tokyo Night theme colors.
- */
-function generateSVG(stats) {
-  const { currentStreak, longestStreak, totalContributions } = stats;
+function generateSVG({ current, longest, total }) {
+  const bg = "#1a1b26";
+  const text = "#c0caf5";
+  const dim = "#565f89";
+  const fire = "#f7768e";
+  const star = "#e0af68";
+  const blue = "#7aa2f7";
 
-  // Tokyo Night theme colors
-  const bgDark = "#1a1b26";
-  const bgLight = "#2d2e42";
-  const textPrimary = "#c0caf5";
-  const textSecondary = "#9ca3af";
-  const accentFire = "#f7768e";
-  const accentSuccess = "#9ece6a";
+  const W = 495;
+  const H = 195;
+  const col = W / 3;
 
-  const width = 360;
-  const height = 180;
-
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" width="${width}" height="${height}">
-  <defs>
-    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:${bgLight};stop-opacity:1" />
-      <stop offset="100%" style="stop-color:${bgDark};stop-opacity:1" />
-    </linearGradient>
-  </defs>
-
-  <!-- Background -->
-  <rect width="${width}" height="${height}" rx="10" fill="url(#bgGradient)" stroke="${textSecondary}" stroke-width="2" opacity="0.3"/>
-
-  <!-- Current Streak Section -->
+  const cell = (i, value, label, color, glyph) => {
+    const cx = col * i + col / 2;
+    return `
   <g>
-    <!-- Icon placeholder (🔥) -->
-    <text x="25" y="50" font-size="32" text-anchor="middle" fill="${accentFire}">🔥</text>
-    
-    <!-- Streak number -->
-    <text x="70" y="52" font-size="36" font-weight="700" fill="${textPrimary}" font-family="'Courier New', monospace">${currentStreak}</text>
-    
-    <!-- Label -->
-    <text x="70" y="72" font-size="12" fill="${textSecondary}" font-family="system-ui">Current Streak</text>
-  </g>
+    <text x="${cx}" y="58" font-size="28" text-anchor="middle">${glyph}</text>
+    <text x="${cx}" y="112" font-size="38" font-weight="700" fill="${color}"
+          text-anchor="middle" font-family="Segoe UI, Ubuntu, sans-serif">${value}</text>
+    <text x="${cx}" y="140" font-size="13" fill="${text}"
+          text-anchor="middle" font-family="Segoe UI, Ubuntu, sans-serif">${label}</text>
+  </g>`;
+  };
 
-  <!-- Longest Streak Section -->
-  <g>
-    <!-- Icon placeholder (⭐) -->
-    <text x="205" y="50" font-size="32" text-anchor="middle" fill="${accentSuccess}">⭐</text>
-    
-    <!-- Streak number -->
-    <text x="250" y="52" font-size="36" font-weight="700" fill="${textPrimary}" font-family="'Courier New', monospace">${longestStreak}</text>
-    
-    <!-- Label -->
-    <text x="250" y="72" font-size="12" fill="${textSecondary}" font-family="system-ui">Longest Streak</text>
-  </g>
-
-  <!-- Total Contributions Section -->
-  <g>
-    <!-- Icon placeholder (📊) -->
-    <text x="25" y="130" font-size="32" text-anchor="middle" fill="#7aa2f7">📊</text>
-    
-    <!-- Count -->
-    <text x="70" y="132" font-size="36" font-weight="700" fill="${textPrimary}" font-family="'Courier New', monospace">${totalContributions}</text>
-    
-    <!-- Label -->
-    <text x="70" y="152" font-size="12" fill="${textSecondary}" font-family="system-ui">Contributions</text>
-  </g>
-
-  <!-- Bottom text: self-hosted note -->
-  <text x="${width - 10}" y="${height - 8}" font-size="9" fill="${textSecondary}" text-anchor="end" font-family="system-ui">Self-hosted</text>
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
+  <rect width="${W}" height="${H}" rx="6" fill="${bg}"/>
+${cell(0, total, "Total Contributions", blue, "\u{1F4CA}")}
+${cell(1, current, "Current Streak", fire, "\u{1F525}")}
+${cell(2, longest, "Longest Streak", star, "\u2B50")}
+  <line x1="${col}" y1="35" x2="${col}" y2="${H - 35}" stroke="${dim}" stroke-width="1"/>
+  <line x1="${col * 2}" y1="35" x2="${col * 2}" y2="${H - 35}" stroke="${dim}" stroke-width="1"/>
+  <text x="${W - 10}" y="${H - 8}" font-size="9" fill="${dim}" text-anchor="end"
+        font-family="Segoe UI, Ubuntu, sans-serif">self-hosted \u00B7 last 365 days</text>
 </svg>`;
 }
 
-/**
- * Main entry point.
- */
 async function main() {
-  try {
-    const commits = await fetchCommits();
-    const stats = calculateStreaks(commits);
-
-    const svg = generateSVG(stats);
-    fs.writeFileSync("streak.svg", svg);
-    console.log("✅ streak.svg written successfully");
-    console.log("");
-  } catch (error) {
-    console.error("\n❌ Generation failed:", error.message);
-    process.exit(3);
+  if (!TOKEN || !USERNAME) {
+    console.error("Missing env vars.");
+    console.error(`  GITHUB_TOKEN: ${TOKEN ? "set" : "MISSING"}`);
+    console.error(`  USERNAME:     ${USERNAME || "MISSING"}`);
+    process.exit(1);
   }
+
+  const to = new Date();
+  const from = new Date(to);
+  from.setUTCFullYear(from.getUTCFullYear() - 1);
+  from.setUTCDate(from.getUTCDate() + 1); // API caps the window at 1 year
+
+  console.log(`Querying contribution calendar for ${USERNAME}`);
+  console.log(`  window: ${from.toISOString()} -> ${to.toISOString()}`);
+
+  const data = await graphql({
+    login: USERNAME,
+    from: from.toISOString(),
+    to: to.toISOString(),
+  });
+
+  const cal = data.user.contributionsCollection.contributionCalendar;
+  const days = cal.weeks.flatMap((w) => w.contributionDays);
+  days.sort((a, b) => a.date.localeCompare(b.date));
+
+  console.log(`  days returned: ${days.length}`);
+
+  const stats = calculateStreaks(days);
+  console.log(
+    `  total=${stats.total} current=${stats.current} longest=${stats.longest}`
+  );
+
+  fs.writeFileSync("streak.svg", generateSVG(stats));
+  console.log("Wrote streak.svg");
 }
 
-main();
+if (require.main === module) {
+  main().catch((err) => {
+    console.error(`FAILED: ${err.message}`);
+    process.exit(1);
+  });
+}
+
+module.exports = { calculateStreaks, generateSVG };
 

@@ -139,15 +139,14 @@ I like machine learning that has to survive contact with the real world — mess
 
 ## 📊 Statistics
 
-<!-- ── Everything below except the streak and the activity graph is generated INSIDE this repo by GitHub Actions
-        (summary-cards.yml + metrics.yml + trophy.yml) → those cards always render.
-        NOTE: summary-cards and trophy do NOT run on push — trigger them from the Actions tab (daily cron takes over after).
-     ── The activity graph is the last free public instance left: it can blink under heavy load and recovers on its own. -->
+<!-- ── Everything below is generated INSIDE this repo by GitHub Actions (trophy.yml, streak.yml, summary-cards.yml, metrics.yml)
+        → those cards always render with zero external dependencies.
+     ── Each runs on its own schedule or on manual trigger from the Actions tab. -->
 
 <div align="center">
 
 <img height="180" src="profile-summary-card-output/tokyonight/3-stats.svg" alt="GitHub stats"/>
-<img height="180" src="https://streak-stats.demolab.com?user=EmaAnd8&theme=tokyonight&hide_border=true" alt="GitHub streak"/>
+<img height="180" src="streak.svg" alt="GitHub streak"/>
 
 <br/><br/>
 
@@ -206,8 +205,3 @@ I like machine learning that has to survive contact with the real world — mess
 -->
 
 <br/><br/>
-
-<!-- ════════════════════════════ FOOTER ════════════════════════════ -->
-<img src="assets/footer.svg" width="100%" alt="footer"/>
-
-</div>

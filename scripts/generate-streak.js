@@ -15,62 +15,95 @@ const fs = require("fs");
 const TOKEN = process.env.GITHUB_TOKEN;
 const USERNAME = process.env.USERNAME;
 
+console.log(`📊 Generating streak stats for @${USERNAME}`);
+
 if (!TOKEN || !USERNAME) {
   console.error("❌ Missing GITHUB_TOKEN or USERNAME env vars");
+  console.error(`   GITHUB_TOKEN: ${TOKEN ? "set" : "MISSING"}`);
+  console.error(`   USERNAME: ${USERNAME ? "set" : "MISSING"}`);
   process.exit(1);
+}
+
+/**
+ * Make HTTPS request with error handling.
+ */
+function httpsRequest(options, body = null) {
+  return new Promise((resolve, reject) => {
+    const req = https.request(options, (res) => {
+      let data = "";
+      res.on("data", (chunk) => (data += chunk));
+      res.on("end", () => {
+        if (res.statusCode >= 400) {
+          console.error(`❌ HTTP ${res.statusCode}`);
+          console.error(`   Response: ${data.substring(0, 200)}`);
+          reject(
+            new Error(
+              `HTTP ${res.statusCode}: ${data.substring(0, 100)}`
+            )
+          );
+          return;
+        }
+        try {
+          resolve(JSON.parse(data));
+        } catch (e) {
+          console.error("❌ JSON parse error");
+          console.error(`   Response: ${data.substring(0, 200)}`);
+          reject(e);
+        }
+      });
+    });
+
+    req.on("error", (err) => {
+      console.error("❌ Network error:", err.message);
+      reject(err);
+    });
+
+    req.setTimeout(10000, () => {
+      req.destroy();
+      reject(new Error("Request timeout"));
+    });
+
+    if (body) req.write(body);
+    req.end();
+  });
 }
 
 /**
  * Fetch user's commits from the past year via GitHub API.
  */
 async function fetchCommits() {
-  return new Promise((resolve, reject) => {
-    const oneYearAgo = new Date();
-    oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
-    const since = oneYearAgo.toISOString();
+  const oneYearAgo = new Date();
+  oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+  const since = oneYearAgo.toISOString();
 
-    const query = new URLSearchParams({
-      q: `author:${USERNAME} committer-date:>=${since}`,
-      sort: "committer-date",
-      order: "desc",
-      per_page: 100,
-    });
-
-    const options = {
-      hostname: "api.github.com",
-      path: `/search/commits?${query}`,
-      method: "GET",
-      headers: {
-        "User-Agent": "GitHub-Streak-Generator",
-        Authorization: `token ${TOKEN}`,
-        Accept: "application/vnd.github.v3+json",
-      },
-    };
-
-    https
-      .request(options, (res) => {
-        let data = "";
-        res.on("data", (chunk) => (data += chunk));
-        res.on("end", () => {
-          if (res.statusCode !== 200) {
-            reject(
-              new Error(
-                `GitHub API error: ${res.statusCode} ${data.substring(0, 100)}`
-              )
-            );
-            return;
-          }
-          try {
-            const parsed = JSON.parse(data);
-            resolve(parsed.items || []);
-          } catch (e) {
-            reject(e);
-          }
-        });
-      })
-      .on("error", reject)
-      .end();
+  const query = new URLSearchParams({
+    q: `author:${USERNAME} committer-date:>=${since}`,
+    sort: "committer-date",
+    order: "desc",
+    per_page: 100,
   });
+
+  const options = {
+    hostname: "api.github.com",
+    path: `/search/commits?${query}`,
+    method: "GET",
+    headers: {
+      "User-Agent": "GitHub-Streak-Generator/1.0",
+      Authorization: `token ${TOKEN}`,
+      Accept: "application/vnd.github.v3+json",
+    },
+  };
+
+  console.log(`   Fetching commits since ${since}...`);
+  const data = await httpsRequest(options);
+  
+  if (data.items) {
+    console.log(`   ✅ Found ${data.items.length} commits`);
+    return data.items;
+  }
+  
+  console.warn(`   ⚠️  No items in response, using empty array`);
+  return [];
 }
 
 /**
@@ -79,11 +112,16 @@ async function fetchCommits() {
 function calculateStreaks(commits) {
   // Get unique dates with commits (UTC midnight)
   const datesWithCommits = new Set();
+  
   commits.forEach((commit) => {
-    if (commit.commit && commit.commit.committer && commit.commit.committer.date) {
-      const date = new Date(commit.commit.committer.date);
-      const dateStr = date.toISOString().split("T")[0];
-      datesWithCommits.add(dateStr);
+    try {
+      if (commit.commit && commit.commit.committer && commit.commit.committer.date) {
+        const date = new Date(commit.commit.committer.date);
+        const dateStr = date.toISOString().split("T")[0];
+        datesWithCommits.add(dateStr);
+      }
+    } catch (e) {
+      console.warn(`   ⚠️  Skipped malformed commit`, e.message);
     }
   });
 
@@ -92,6 +130,7 @@ function calculateStreaks(commits) {
     .reverse(); // Most recent first
 
   if (sortedDates.length === 0) {
+    console.warn("   ⚠️  No commits found, using zeros");
     return {
       currentStreak: 0,
       longestStreak: 0,
@@ -132,6 +171,10 @@ function calculateStreaks(commits) {
       currentRunStreak = 1;
     }
   }
+
+  console.log(
+    `   📈 Current: ${currentStreak} | Longest: ${longestStreak} | Total: ${sortedDates.length}`
+  );
 
   return {
     currentStreak,
@@ -215,22 +258,18 @@ function generateSVG(stats) {
  */
 async function main() {
   try {
-    console.log(`📊 Fetching contributions for @${USERNAME}...`);
     const commits = await fetchCommits();
-    console.log(`✅ Found ${commits.length} commits in the past year`);
-
     const stats = calculateStreaks(commits);
-    console.log(
-      `   🔥 Current streak: ${stats.currentStreak} days | ⭐ Longest: ${stats.longestStreak} days | 📊 Total: ${stats.totalContributions}`
-    );
 
     const svg = generateSVG(stats);
     fs.writeFileSync("streak.svg", svg);
-    console.log("✅ streak.svg generated successfully");
+    console.log("✅ streak.svg written successfully");
+    console.log("");
   } catch (error) {
-    console.error("❌ Generation failed:", error.message);
-    process.exit(1);
+    console.error("\n❌ Generation failed:", error.message);
+    process.exit(3);
   }
 }
 
 main();
+

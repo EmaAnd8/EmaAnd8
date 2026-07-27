@@ -1,57 +1,60 @@
-# Place this file at: .github/workflows/trophy.yml in your EmaAnd8/EmaAnd8 repo
+# .github/workflows/trophy.yml  —  EmaAnd8/EmaAnd8
 #
-# Generates trophy.svg AND streak.svg INSIDE this repo (self-hosted).
-# Eliminates external service dependencies for both badges.
+# Generates trophy.svg and streak.svg inside this repo.
 #
-# Security notes:
-# - The trophy action ref is PINNED to a commit SHA (immutable)
-# - Uses only the built-in GITHUB_TOKEN (repo-scoped, expires after run)
-# - Streak generation is pure GitHub API + SVG, no external services
+# Token note: the trophy action queries the GraphQL contributionsCollection
+# endpoint, which the default GITHUB_TOKEN is often not permitted to read for a
+# user account. METRICS_TOKEN (the PAT already used by metrics.yml) works.
+# The streak step uses the same endpoint, so it needs the same token.
 #
-name: Generate trophies and streak stats
+# The trophy step is marked continue-on-error so that a failure in the
+# third-party action does not block the streak card from updating.
+
+name: Generate trophies and streak
 on:
   schedule:
     - cron: "45 3 * * *" # daily at 03:45 UTC
   workflow_dispatch:
 permissions:
   contents: write
+
 jobs:
   trophy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
-      - name: Set up Node.js 24
-        uses: actions/setup-node@v4
+
+      - uses: actions/setup-node@v4
         with:
           node-version: "24"
-      
+
       - name: Generate trophy SVG
+        continue-on-error: true
         # = Erik-Donath/github-profile-trophy@feature/generate-svg, pinned
         uses: Erik-Donath/github-profile-trophy@eb0893b31de06841663555d10aa43eb7cf27952f
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.METRICS_TOKEN }}
           username: ${{ github.repository_owner }}
           file: trophy.svg
           theme: tokyonight
           max-rows: "1"
           max-cols: "7"
           margin-width: "8"
-      
+
       - name: Generate streak SVG
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.METRICS_TOKEN }}
           USERNAME: ${{ github.repository_owner }}
-        run: |
-          set -x  # Enable debug output
-          node scripts/generate-streak.js
-          echo "✅ Streak generation completed"
-      
+        run: node scripts/generate-streak.js
+
       - name: Commit and push
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add trophy.svg streak.svg
-          git diff --cached --quiet || git commit -m "Update trophy.svg and streak.svg"
+          for f in trophy.svg streak.svg; do
+            [ -f "$f" ] && git add "$f"
+          done
+          git diff --cached --quiet && echo "nothing to commit" && exit 0
+          git commit -m "Update profile cards"
+          git pull --rebase --autostash
           git push
-

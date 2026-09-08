@@ -291,5 +291,4 @@ if (require.main === module) {
 }
 
 module.exports = { calculateStreaks, streakSVG, activityGraphSVG, niceMax };
-module.exports = { calculateStreaks, generateSVG };
 

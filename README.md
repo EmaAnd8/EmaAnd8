@@ -159,7 +159,7 @@ I like machine learning that has to survive contact with the real world — mess
 
 <br/><br/>
 
-<img width="100%" src="activity-graph.svg" alt="Contribution graph"/>
+
 
 <br/><br/>
 

@@ -1,17 +1,19 @@
 # .github/workflows/trophy.yml  —  EmaAnd8/EmaAnd8
 #
 # Generates trophy.svg, streak.svg and activity-graph.svg inside this repo.
+# Self-contained: the card generator is embedded below, so this is the ONLY
+# file you need. No scripts/ directory required.
 #
-# Both streak-stats.demolab.com and github-readme-activity-graph.vercel.app
-# now return HTTP 402, so those two cards are generated locally from a single
-# GraphQL contributionsCollection query in scripts/generate-streak.js.
+# Why self-hosted: streak-stats.demolab.com and
+# github-readme-activity-graph.vercel.app both return HTTP 402 (the free
+# public instances are disabled), exactly like the trophy instance did.
 #
-# Token note: the contributionsCollection endpoint is often not readable with
-# the default GITHUB_TOKEN for a user account. METRICS_TOKEN (the PAT already
-# used by metrics.yml) works for both the trophy action and the script.
+# Tokens: the script tries METRICS_TOKEN first, then the built-in
+# GITHUB_TOKEN, and uses whichever can read the contribution calendar. If
+# METRICS_TOKEN does not exist in this repo, that is fine — it is skipped.
 #
-# The trophy step is continue-on-error so a failure in the third-party action
-# does not block the other two cards from updating.
+# The trophy step is continue-on-error so a failure in the third-party Deno
+# action cannot block the other two cards.
 
 name: Generate profile cards
 on:
@@ -36,7 +38,7 @@ jobs:
         # = Erik-Donath/github-profile-trophy@feature/generate-svg, pinned
         uses: Erik-Donath/github-profile-trophy@eb0893b31de06841663555d10aa43eb7cf27952f
         with:
-          token: ${{ secrets.METRICS_TOKEN }}
+          token: ${{ secrets.METRICS_TOKEN || secrets.GITHUB_TOKEN }}
           username: ${{ github.repository_owner }}
           file: trophy.svg
           theme: tokyonight
@@ -46,9 +48,244 @@ jobs:
 
       - name: Generate streak and activity graph
         env:
-          GITHUB_TOKEN: ${{ secrets.METRICS_TOKEN }}
+          METRICS_TOKEN: ${{ secrets.METRICS_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           USERNAME: ${{ github.repository_owner }}
-        run: node scripts/generate-streak.js
+        run: |
+          cat > /tmp/gen.js <<'GENEOF'
+          const https = require("https");
+          const fs = require("fs");
+
+          const USERNAME = process.env.USERNAME;
+          // Try every token we were given, in order. Whichever one can read the
+          // contribution calendar wins. This makes the job independent of whether
+          // METRICS_TOKEN exists in the repo.
+          const CANDIDATES = [
+            ["METRICS_TOKEN", process.env.METRICS_TOKEN],
+            ["GITHUB_TOKEN", process.env.GH_TOKEN],
+          ].filter(([, v]) => v && v.trim());
+
+          const QUERY = `
+          query($login: String!, $from: DateTime!, $to: DateTime!) {
+            user(login: $login) {
+              contributionsCollection(from: $from, to: $to) {
+                contributionCalendar {
+                  totalContributions
+                  weeks { contributionDays { date contributionCount } }
+                }
+              }
+            }
+          }`;
+
+          const C = {
+            bg: "#1a1b26", text: "#c0caf5", dim: "#565f89",
+            fire: "#f7768e", star: "#e0af68", blue: "#7aa2f7", line: "#70a5fd",
+          };
+
+          function graphql(token, variables) {
+            const body = JSON.stringify({ query: QUERY, variables });
+            return new Promise((resolve, reject) => {
+              const req = https.request({
+                hostname: "api.github.com",
+                path: "/graphql",
+                method: "POST",
+                headers: {
+                  "User-Agent": "profile-card-generator",
+                  Authorization: `bearer ${token}`,
+                  "Content-Type": "application/json",
+                  "Content-Length": Buffer.byteLength(body),
+                },
+              }, (res) => {
+                let data = "";
+                res.on("data", (c) => (data += c));
+                res.on("end", () => {
+                  if (res.statusCode !== 200) {
+                    return reject(new Error(`HTTP ${res.statusCode}: ${data.slice(0, 200)}`));
+                  }
+                  let p;
+                  try { p = JSON.parse(data); }
+                  catch (e) { return reject(new Error(`Bad JSON: ${data.slice(0, 200)}`)); }
+                  if (p.errors) {
+                    return reject(new Error(`GraphQL: ${JSON.stringify(p.errors).slice(0, 200)}`));
+                  }
+                  if (!p.data || !p.data.user) {
+                    return reject(new Error(`No user data for "${variables.login}"`));
+                  }
+                  resolve(p.data);
+                });
+              });
+              req.on("error", reject);
+              req.setTimeout(15000, () => { req.destroy(); reject(new Error("Timeout")); });
+              req.write(body);
+              req.end();
+            });
+          }
+
+          function esc(s) {
+            return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+          }
+
+          function calculateStreaks(days) {
+            const total = days.reduce((s, d) => s + d.contributionCount, 0);
+            let longest = 0, run = 0;
+            for (const d of days) {
+              if (d.contributionCount > 0) { run += 1; if (run > longest) longest = run; }
+              else run = 0;
+            }
+            // A zero on TODAY doesn't break the streak; earlier zeros do.
+            let current = 0;
+            for (let i = days.length - 1; i >= 0; i--) {
+              if (days[i].contributionCount > 0) current += 1;
+              else if (i === days.length - 1) continue;
+              else break;
+            }
+            return { current, longest, total };
+          }
+
+          function streakSVG({ current, longest, total }) {
+            const W = 495, H = 195, col = W / 3;
+            const cell = (i, value, label, color, glyph) => {
+              const cx = col * i + col / 2;
+              return `
+            <g>
+              <text x="${cx}" y="58" font-size="28" text-anchor="middle">${glyph}</text>
+              <text x="${cx}" y="112" font-size="38" font-weight="700" fill="${color}"
+                    text-anchor="middle" font-family="Segoe UI, Ubuntu, sans-serif">${value}</text>
+              <text x="${cx}" y="140" font-size="13" fill="${C.text}"
+                    text-anchor="middle" font-family="Segoe UI, Ubuntu, sans-serif">${label}</text>
+            </g>`;
+            };
+            return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
+            <rect width="${W}" height="${H}" rx="6" fill="${C.bg}"/>
+          ${cell(0, total, "Total Contributions", C.blue, "\u{1F4CA}")}
+          ${cell(1, current, "Current Streak", C.fire, "\u{1F525}")}
+          ${cell(2, longest, "Longest Streak", C.star, "\u2B50")}
+            <line x1="${col}" y1="35" x2="${col}" y2="${H - 35}" stroke="${C.dim}" stroke-width="1"/>
+            <line x1="${col * 2}" y1="35" x2="${col * 2}" y2="${H - 35}" stroke="${C.dim}" stroke-width="1"/>
+            <text x="${W - 10}" y="${H - 8}" font-size="9" fill="${C.dim}" text-anchor="end"
+                  font-family="Segoe UI, Ubuntu, sans-serif">self-hosted \u00B7 last 365 days</text>
+          </svg>`;
+          }
+
+          const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+          function niceMax(v) {
+            if (v <= 5) return Math.max(v, 1);
+            const mag = Math.pow(10, Math.floor(Math.log10(v)));
+            for (const m of [1, 2, 5, 10]) if (v <= m * mag) return m * mag;
+            return 10 * mag;
+          }
+
+          function activityGraphSVG(days, username) {
+            const W = 880, H = 300;
+            const padL = 50, padR = 24, padT = 60, padB = 46;
+            const plotW = W - padL - padR, plotH = H - padT - padB;
+            const n = days.length;
+            const peak = Math.max(1, ...days.map((d) => d.contributionCount));
+            const yMax = niceMax(peak);
+            const x = (i) => padL + (n <= 1 ? 0 : (i / (n - 1)) * plotW);
+            const y = (v) => padT + plotH - (v / yMax) * plotH;
+
+            let grid = "";
+            for (let t = 0; t <= 4; t++) {
+              const val = (yMax / 4) * t, gy = y(val);
+              grid += `
+            <line x1="${padL}" y1="${gy.toFixed(1)}" x2="${W - padR}" y2="${gy.toFixed(1)}"
+                  stroke="${C.dim}" stroke-width="1" opacity="0.25"/>
+            <text x="${padL - 10}" y="${(gy + 4).toFixed(1)}" font-size="11" fill="${C.dim}"
+                  text-anchor="end" font-family="Segoe UI, Ubuntu, sans-serif">${Math.round(val)}</text>`;
+            }
+
+            let xlabels = "", lastMonth = -1;
+            days.forEach((d, i) => {
+              const m = parseInt(d.date.slice(5, 7), 10) - 1;
+              if (m !== lastMonth) {
+                lastMonth = m;
+                const px = x(i);
+                if (px > padL + 12 && px < W - padR - 12) {
+                  xlabels += `
+            <text x="${px.toFixed(1)}" y="${H - padB + 20}" font-size="11" fill="${C.dim}"
+                  text-anchor="middle" font-family="Segoe UI, Ubuntu, sans-serif">${MONTHS[m]}</text>`;
+                }
+              }
+            });
+
+            const pts = days.map((d, i) => `${x(i).toFixed(1)},${y(d.contributionCount).toFixed(1)}`).join(" ");
+            const areaPts = `${padL},${padT + plotH} ${pts} ${(padL + plotW).toFixed(1)},${padT + plotH}`;
+
+            return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
+            <defs>
+              <linearGradient id="area" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="${C.line}" stop-opacity="0.45"/>
+                <stop offset="100%" stop-color="${C.line}" stop-opacity="0.02"/>
+              </linearGradient>
+            </defs>
+            <rect width="${W}" height="${H}" rx="6" fill="${C.bg}"/>
+            <text x="${padL}" y="34" font-size="17" font-weight="600" fill="${C.text}"
+                  font-family="Segoe UI, Ubuntu, sans-serif">${esc(username)}'s contribution graph</text>
+          ${grid}
+            <polygon points="${areaPts}" fill="url(#area)"/>
+            <polyline points="${pts}" fill="none" stroke="${C.line}" stroke-width="1.8"
+                      stroke-linejoin="round" stroke-linecap="round"/>
+          ${xlabels}
+            <text x="${W - padR}" y="${H - 10}" font-size="9" fill="${C.dim}" text-anchor="end"
+                  font-family="Segoe UI, Ubuntu, sans-serif">self-hosted \u00B7 peak ${peak}/day</text>
+          </svg>`;
+          }
+
+          async function main() {
+            console.log(`user: ${USERNAME || "(MISSING)"}`);
+            console.log(`tokens available: ${CANDIDATES.length ? CANDIDATES.map(([n]) => n).join(", ") : "NONE"}`);
+
+            if (!USERNAME) { console.error("USERNAME is empty."); process.exit(1); }
+            if (!CANDIDATES.length) {
+              console.error("No usable token. Neither METRICS_TOKEN nor GITHUB_TOKEN was set.");
+              process.exit(1);
+            }
+
+            const to = new Date();
+            const from = new Date(to);
+            from.setUTCFullYear(from.getUTCFullYear() - 1);
+            from.setUTCDate(from.getUTCDate() + 1); // API caps the window at 1 year
+            const vars = { login: USERNAME, from: from.toISOString(), to: to.toISOString() };
+
+            let data = null;
+            const failures = [];
+            for (const [name, token] of CANDIDATES) {
+              try {
+                data = await graphql(token, vars);
+                console.log(`fetched with ${name}`);
+                break;
+              } catch (e) {
+                console.log(`${name} failed: ${e.message}`);
+                failures.push(`${name}: ${e.message}`);
+              }
+            }
+            if (!data) {
+              console.error("All tokens failed:");
+              failures.forEach((f) => console.error(`  ${f}`));
+              process.exit(1);
+            }
+
+            const days = data.user.contributionsCollection.contributionCalendar.weeks
+              .flatMap((w) => w.contributionDays)
+              .sort((a, b) => a.date.localeCompare(b.date));
+
+            const stats = calculateStreaks(days);
+            console.log(`days=${days.length} total=${stats.total} current=${stats.current} longest=${stats.longest}`);
+
+            fs.writeFileSync("streak.svg", streakSVG(stats));
+            fs.writeFileSync("activity-graph.svg", activityGraphSVG(days, USERNAME));
+            console.log("wrote streak.svg and activity-graph.svg");
+          }
+
+          if (require.main === module) {
+            main().catch((e) => { console.error(`FAILED: ${e.message}`); process.exit(1); });
+          }
+          module.exports = { calculateStreaks, streakSVG, activityGraphSVG, niceMax };
+
+          GENEOF
+          node /tmp/gen.js
 
       - name: Commit and push
         run: |

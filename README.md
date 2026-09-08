@@ -159,7 +159,7 @@ I like machine learning that has to survive contact with the real world — mess
 
 <br/><br/>
 
-<img src="https://github-readme-activity-graph.vercel.app/graph?username=EmaAnd8&theme=tokyo-night&hide_border=true&area=true" alt="Contribution graph"/>
+<img width="100%" src="activity-graph.svg" alt="Contribution graph"/>
 
 <br/><br/>
 

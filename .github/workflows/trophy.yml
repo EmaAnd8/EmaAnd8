@@ -1,16 +1,19 @@
 # .github/workflows/trophy.yml  —  EmaAnd8/EmaAnd8
 #
-# Generates trophy.svg and streak.svg inside this repo.
+# Generates trophy.svg, streak.svg and activity-graph.svg inside this repo.
 #
-# Token note: the trophy action queries the GraphQL contributionsCollection
-# endpoint, which the default GITHUB_TOKEN is often not permitted to read for a
-# user account. METRICS_TOKEN (the PAT already used by metrics.yml) works.
-# The streak step uses the same endpoint, so it needs the same token.
+# Both streak-stats.demolab.com and github-readme-activity-graph.vercel.app
+# now return HTTP 402, so those two cards are generated locally from a single
+# GraphQL contributionsCollection query in scripts/generate-streak.js.
 #
-# The trophy step is marked continue-on-error so that a failure in the
-# third-party action does not block the streak card from updating.
+# Token note: the contributionsCollection endpoint is often not readable with
+# the default GITHUB_TOKEN for a user account. METRICS_TOKEN (the PAT already
+# used by metrics.yml) works for both the trophy action and the script.
+#
+# The trophy step is continue-on-error so a failure in the third-party action
+# does not block the other two cards from updating.
 
-name: Generate trophies and streak
+name: Generate profile cards
 on:
   schedule:
     - cron: "45 3 * * *" # daily at 03:45 UTC
@@ -41,7 +44,7 @@ jobs:
           max-cols: "7"
           margin-width: "8"
 
-      - name: Generate streak SVG
+      - name: Generate streak and activity graph
         env:
           GITHUB_TOKEN: ${{ secrets.METRICS_TOKEN }}
           USERNAME: ${{ github.repository_owner }}
@@ -51,7 +54,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          for f in trophy.svg streak.svg; do
+          for f in trophy.svg streak.svg activity-graph.svg; do
             [ -f "$f" ] && git add "$f"
           done
           git diff --cached --quiet && echo "nothing to commit" && exit 0

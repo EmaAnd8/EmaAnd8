@@ -12,7 +12,7 @@
   <g>
     <text x="247.5" y="58" font-size="28" text-anchor="middle">🔥</text>
     <text x="247.5" y="112" font-size="38" font-weight="700" fill="#f7768e"
-          text-anchor="middle" font-family="Segoe UI, Ubuntu, sans-serif">1</text>
+          text-anchor="middle" font-family="Segoe UI, Ubuntu, sans-serif">0</text>
     <text x="247.5" y="140" font-size="13" fill="#c0caf5"
           text-anchor="middle" font-family="Segoe UI, Ubuntu, sans-serif">Current Streak</text>
   </g>
